@@ -1,3 +1,5 @@
 import { loadCSV } from "./csv";
 
-loadCSV("data/mmlu.csv");
+const data = loadCSV("data/mmlu.csv");
+
+console.log(data);
