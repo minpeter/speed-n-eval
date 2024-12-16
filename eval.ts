@@ -25,6 +25,7 @@ const evalModel = async (
     console.log(`current: ${current}, object: ${object}, answer: ${answer}`);
     return current;
   } catch {
+    console.log("current: false, object: error, answer: error");
     return false;
   }
 };
