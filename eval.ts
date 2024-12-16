@@ -1,5 +1,12 @@
 import { loadCSV } from "./csv";
 
-const data = loadCSV("data/mmlu.csv");
+async function main() {
+  try {
+    const data = await loadCSV("data/mmlu.csv");
+    console.log(data);
+  } catch (error) {
+    console.error("Error loading CSV:", error);
+  }
+}
 
-console.log(data);
+main();

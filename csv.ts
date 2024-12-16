@@ -1,25 +1,21 @@
-import { readFileSync } from "fs";
+import { createReadStream } from "fs";
+import csv from "csv-parser";
 
-interface CSVRow {
-  [key: string]: string;
-}
+export const loadCSV = (filename: string): Promise<any[]> => {
+  return new Promise((resolve, reject) => {
+    const results: any[] = [];
 
-export const loadCSV = (filename: string): CSVRow[] => {
-  const fileContent = readFileSync(filename, "utf-8");
-  const lines = fileContent.trim().split("\n");
-
-  const headers = lines[0]
-    .split(",")
-    .map((header) => header.trim().replace(/^["']|["']$/g, ""));
-
-  return lines.slice(1).map((line) => {
-    const values = line
-      .split(",")
-      .map((value) => value.trim().replace(/^["']|["']$/g, ""));
-
-    return headers.reduce((row: CSVRow, header, index) => {
-      row[header] = values[index];
-      return row;
-    }, {});
+    createReadStream(filename)
+      .pipe(csv())
+      .on("data", (data) => {
+        results.push(data);
+      })
+      .on("end", () => {
+        // console.log("CSV file successfully processed");
+        resolve(results);
+      })
+      .on("error", (error) => {
+        reject(error);
+      });
   });
 };

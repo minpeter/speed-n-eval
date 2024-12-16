@@ -1,4 +1,3 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { friendli } from "@friendliai/ai-provider";
 import { streamText } from "ai";
 import { loadCSV } from "./csv";
@@ -39,28 +38,31 @@ const runModel = async (input: string) => {
   return { ttop, e2eTime, ttft };
 };
 
-const data = loadCSV("data/prompt.csv");
+async function main() {
+  try {
+    const prompts = await loadCSV("data/prompt.csv");
+    let MedianTTFT = 0;
+    let MedianTTOP = 0;
+    let MedianE2E = 0;
 
-let MedianTTFT = 0;
-let MedianTTOP = 0;
-let MedianE2E = 0;
+    const results = await Promise.all(
+      prompts.slice(-25).map(({ prompt }) => runModel(prompt))
+    );
 
-const promises = data.slice(-25).map(({ prompt }) => {
-  return runModel(prompt);
-});
+    results.forEach(({ e2eTime, ttop, ttft }) => {
+      MedianTTFT += ttft;
+      MedianTTOP += ttop;
+      MedianE2E += e2eTime;
+    });
 
-Promise.all(promises).then((results) => {
-  results.forEach(({ e2eTime, ttop, ttft }) => {
-    MedianTTFT += ttft;
-    MedianTTOP += ttop;
-    MedianE2E += e2eTime;
-  });
+    const count = results.length;
 
-  const count = results.length;
+    console.log(`Median TTFT: ${(MedianTTFT / count).toFixed(2)}s`);
+    console.log(`Median TTOP: ${(MedianTTOP / count).toFixed(2)}T/s`);
+    console.log(`Median E2E: ${(MedianE2E / count).toFixed(2)}s`);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
 
-  // ${ttop.toFixed(2)} T/s
-
-  console.log(`Median TTFT: ${(MedianTTFT / count).toFixed(2)}s`);
-  console.log(`Median TTOP: ${(MedianTTOP / count).toFixed(2)}T/s`);
-  console.log(`Median E2E: ${(MedianE2E / count).toFixed(2)}s`);
-});
+main();
