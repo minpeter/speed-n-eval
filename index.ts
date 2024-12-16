@@ -1,4 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { friendli } from "@friendliai/ai-provider";
 import { streamText } from "ai";
 import { readFileSync } from "fs";
 
@@ -26,11 +27,6 @@ const loadCSV = (filename: string): CSVRow[] => {
   });
 };
 
-const friendli = createOpenAI({
-  apiKey: process.env.FRIENDLI_TOKEN,
-  baseURL: "https://api.friendli.ai/serverless/v1",
-});
-
 const runModel = async (input: string) => {
   const start = new Date().getTime();
 
@@ -41,7 +37,7 @@ const runModel = async (input: string) => {
   let resultText = "";
 
   const { textStream, usage } = streamText({
-    model: friendli("meta-llama-3.1-70b-instruct"),
+    model: friendli("meta-llama-3.1-8b-instruct"),
     prompt: input,
   });
 
