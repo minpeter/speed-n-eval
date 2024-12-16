@@ -17,10 +17,13 @@ const evalModel = async (
       maxTokens: longest.length + 50,
       output: "enum",
       enum: choices,
-      prompt: question,
+      temperature: 1,
+      prompt: `Question: ${question}\nChoices: ${choices.join(", ")}`,
     });
 
-    return object === answer;
+    const current = object === answer;
+    console.log(`current: ${current}, object: ${object}, answer: ${answer}`);
+    return current;
   } catch {
     return false;
   }
@@ -34,11 +37,12 @@ async function main() {
     let total = 0;
 
     const results = await Promise.all(
-      data
-        .slice(-5)
-        .map(({ Question, A, B, C, D, Answer }) =>
-          evalModel(Question, [A, B, C, D], Answer)
-        )
+      data.slice(-30).map(({ Question, A, B, C, D, Answer }) => {
+        const choices = [A, B, C, D];
+        const actualAnswer = choices["ABCD".indexOf(Answer)];
+
+        return evalModel(Question, choices, actualAnswer);
+      })
     );
 
     results.forEach((result) => {
@@ -53,6 +57,8 @@ async function main() {
     console.log(`Correct: ${correct}`);
     console.log(`Wrong: ${wrong}`);
     console.log(`Total: ${total}`);
+
+    console.log(`Accuracy: ${(correct / total) * 100}%`);
   } catch (error) {
     console.error("Error:", error);
   }
