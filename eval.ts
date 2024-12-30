@@ -1,4 +1,4 @@
-import { generateObject, generateText } from "ai";
+import { generateObject } from "ai";
 import { loadCSV } from "./csv";
 import { friendli } from "@friendliai/ai-provider";
 

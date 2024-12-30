@@ -8,7 +8,6 @@ const runModel = async (input: string) => {
   let ttft = 0;
   // Receive second token
   let receiveSecondToken = 0;
-  let totalChunkCound = 0;
   let resultText = "";
 
   const { textStream, usage } = streamText({
@@ -26,14 +25,13 @@ const runModel = async (input: string) => {
     }
 
     resultText += textPart;
-    totalChunkCound += textPart.split(/\s+/).length;
   }
 
   const end = new Date().getTime();
 
   const e2eTime = (end - start) / 1000; // Total end-to-end time
   const secondToken2eTime = (end - receiveSecondToken) / 1000; // Time from the second token to the end
-  const ttop = totalChunkCound / secondToken2eTime;
+  const ttop = (await usage).completionTokens / secondToken2eTime;
 
   return { ttop, e2eTime, ttft };
 };
@@ -46,7 +44,7 @@ async function main() {
     let MedianE2E = 0;
 
     const results = await Promise.all(
-      prompts.slice(-25).map(({ prompt }) => runModel(prompt))
+      prompts.slice(-10).map(({ prompt }) => runModel(prompt))
     );
 
     results.forEach(({ e2eTime, ttop, ttft }) => {
